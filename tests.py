@@ -2,6 +2,16 @@ import pytest
 from model import Question
 
 
+@pytest.fixture
+def question_with_choices():
+    question = Question(title='Qual é a capital do Brasil?', points=10, max_selections=1)
+    question.add_choice('Rio de Janeiro', False)
+    question.add_choice('Brasília', True)
+    question.add_choice('São Paulo', False)
+    question.add_choice('Belo Horizonte', False)
+    return question
+
+
 def test_create_question():
     question = Question(title='q1')
     assert question.id != None
@@ -137,3 +147,21 @@ def test_choice_is_correct_defaults_to_false():
     question.add_choice('choice A')
     
     assert question.choices[0].is_correct == False
+
+def test_fixture_question_has_correct_structure(question_with_choices):
+    question = question_with_choices
+    
+    assert question.title == 'Qual é a capital do Brasil?'
+    assert question.points == 10
+    assert question.max_selections == 1
+    assert len(question.choices) == 4
+    assert question.choices[1].is_correct == True
+    assert question.choices[0].is_correct == False
+
+def test_fixture_question_correct_answer_identification(question_with_choices):
+    question = question_with_choices
+    
+    result = question.correct_selected_choices([2])
+    
+    assert result == [2]
+    assert question.choices[1].text == 'Brasília'
